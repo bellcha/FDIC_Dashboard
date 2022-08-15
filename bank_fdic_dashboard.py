@@ -4,6 +4,7 @@ import pandas as pd
 from dataclasses import dataclass, asdict
 import streamlit as st
 import plotly.express as px
+import yfinance as yf
 
 @dataclass
 class BankData:
@@ -56,11 +57,26 @@ def get_return_ratios(num_of_records: int, values: pd.DataFrame):
 
     return fig
 
+def get_stock_history():
+    mnmb = yf.Ticker('MNMB')
+
+    stock_history = mnmb.history(period = 'max')
+
+    stock_history = stock_history.drop(['Open', 'High', 'Low', 'Volume', 'Dividends', 'Stock Splits'], axis=1)
+    
+    stock_history = stock_history.reset_index()
+
+    print(stock_history)
+
+    return stock_history
+
     
 def main():
     st.title('Merchants & Marine Bank')
 
     chart_data = get_data()
+
+    stock_data = get_stock_history()
     
     num_of_periods = st.number_input('Enter Number of Reporting Periods 1 - 30 (Default is 5)',1 , 30)
 
@@ -82,6 +98,9 @@ def main():
 
     col2.write('Effiency Ratio')
     col2.bar_chart(chart_data.head(num_of_periods), x='REPDTE', y='EEFFQR')
+    
+    st.write('MNMB Stock Price History')
+    st.line_chart(stock_data, x = 'Date', y = 'Close')
 
 if __name__ == '__main__':
 
