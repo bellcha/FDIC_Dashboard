@@ -37,7 +37,7 @@ def fdic_bar_chart(num_of_records: int, values: pd.DataFrame):
     
     values = values.head(num_of_records)
 
-    values = values.drop(['NETINC','EEFFQR'], axis=1)
+    values = values.drop(['NETINC','EEFFQR', 'ROA', 'ROE'], axis=1)
 
     values = pd.melt(values,id_vars=['REPDTE'], var_name='Category', value_name='Total')
 
@@ -65,8 +65,6 @@ def get_stock_history():
     stock_history = stock_history.drop(['Open', 'High', 'Low', 'Volume', 'Dividends', 'Stock Splits'], axis=1)
     
     stock_history = stock_history.reset_index()
-
-    print(stock_history)
 
     return stock_history
 
