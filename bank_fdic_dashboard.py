@@ -76,9 +76,9 @@ def main():
 
     stock_data = get_stock_history()
     
-    num_of_periods = st.number_input('Enter Number of Reporting Periods 1 - 30 (Default is 5)',1 , 30)
+    num_of_periods = st.number_input('Enter Number of Reporting Periods 1 - 30 (Default is 5)',0 , 30)
 
-    if num_of_periods < 1:
+    if num_of_periods <= 0:
         num_of_periods = 5
 
     fig = fdic_bar_chart(num_of_periods, chart_data)
