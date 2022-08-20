@@ -14,6 +14,8 @@ I have included a Docker file for easy installation and running the application.
   -	Confirm the Docker image is running by entering the following command: sudo docker ps -a
   -	You can navigate to the dashboard by opening your browers and entering the following url: Localhost: http://localhost:8501 or on a server http://serverip:8501 
 
+Example: You can navigate to my instance of the app to see how it looks and feels:  http://dashboard.bellcha.com
+
 **Using the App**
 
 When navigating to the app, the default setting is to display the last five quarters.  In the bar at the top of the screen, you can enter a number between 1 and 30 to display additional historical data.
