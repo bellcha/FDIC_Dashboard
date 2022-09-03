@@ -8,7 +8,7 @@ The FDIC Call Report Dashboard allows you to visualize a Bank’s financial perf
 
 I have included a Docker file for easy installation and running the application.  
   -	If you don’t have Docker installed, please see Docker’s official documentation for installation instructions (https://docs.docker.com/get-docker/)
-  -	Simply Git pull the project to your local machine or server.  Once downloaded, navigate to the project’s directory.  
+  -	Simply Git clone the project to your local machine or server.  Once downloaded, navigate to the project’s directory.  
   -	Inside the project’s directory, build the docker imager by entering the following command as sudo or administrator: sudo docker build –t fdicdashboard:latest .
   -	Once the docker image is built, start the Docker container with the following command: sudo docker run -d -p 8501:8501 fdicdashboard:latest
   -	Confirm the Docker image is running by entering the following command: sudo docker ps -a
