@@ -176,8 +176,6 @@ def main():
         
     chart_data = get_data(cert)
 
-    stock_data = get_stock_history('MNMB')
-
     num_of_periods = st.number_input('Enter Number of Reporting Periods 1 - 30 (Default is 5)',1 , 30, value= 5)
 
     fig = fdic_bar_chart(num_of_periods, chart_data)
@@ -196,8 +194,8 @@ def main():
     col2.write('Effiency Ratio')
     col2.bar_chart(chart_data.head(num_of_periods), x='REPDTE', y='EEFFQR')
     
-    st.write(f'Stock Price History')
-    st.line_chart(stock_data, x = 'Date', y = 'Close')
+    #st.write(f'Stock Price History')
+    #st.line_chart(stock_data, x = 'Date', y = 'Close')
 
 if __name__ == '__main__':
 
