@@ -129,7 +129,7 @@ def fdic_bar_chart(num_of_records: int, values: pd.DataFrame):
     
     values = values.head(num_of_records)
 
-    values = values.drop(['NETINC','EEFFQR'], axis=1)
+    values = values.drop(['NETINC','EEFFQR', 'ROA', 'ROE'], axis=1)
 
     values = pd.melt(values,id_vars=['REPDTE'], var_name='Category', value_name='Total')
 
@@ -180,10 +180,10 @@ def main():
 
         stock_data = get_stock_history('MNMB')
     
-        num_of_periods = st.number_input('Enter Number of Reporting Periods 1 - 30 (Default is 5)',1 , 30)
+    num_of_periods = st.number_input('Enter Number of Reporting Periods 1 - 30 (Default is 5)',1 , 30)
 
-        if num_of_periods <= 1:
-            num_of_periods = 5
+    if num_of_periods <= 1:
+        num_of_periods = 5
 
         fig = fdic_bar_chart(num_of_periods, chart_data)
 
