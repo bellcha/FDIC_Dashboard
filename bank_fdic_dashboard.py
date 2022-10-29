@@ -168,15 +168,24 @@ def main():
 
     bank_names = [i for i in ms_banks]
 
-    bank = st.selectbox('Choose a Bank:', bank_names)
+    with st.form(key = 'columns_in_form'):
+        s1, s2 = st.columns(2)
+
+        with s1:
+
+            bank = st.selectbox('Choose a Bank:', bank_names)
+
+        with s2:
+
+            num_of_periods = st.number_input('Enter Number of Reporting Periods 1 - 30 (Default is 5)',1 , 30, value= 5)
+
+        submit_button = st.form_submit_button('Submit')
     
     cert = ms_banks[bank]
 
     st.subheader(f'{bank}')
         
     chart_data = get_data(cert)
-
-    num_of_periods = st.number_input('Enter Number of Reporting Periods 1 - 30 (Default is 5)',1 , 30, value= 5)
 
     fig = fdic_bar_chart(num_of_periods, chart_data)
 
