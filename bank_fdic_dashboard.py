@@ -168,18 +168,22 @@ def main():
 
     bank_names = [i for i in ms_banks]
 
-    with st.form(key = 'columns_in_form'):
-        s1, s2 = st.columns(2)
+    #with st.form(key = 'columns_in_form'):
+        #s1, s2 = st.columns(2)
 
-        with s1:
+        #with s1:
 
-            bank = st.selectbox('Choose a Bank:', bank_names)
+            #bank = st.selectbox('Choose a Bank:', bank_names)
 
-        with s2:
+        #with s2:
 
-            num_of_periods = st.number_input('Enter Number of Reporting Periods 1 - 30 (Default is 5)',1 , 30, value= 5)
+            #num_of_periods = st.number_input('Enter Number of Reporting Periods 1 - 30 (Default is 5)',1 , 30, value= 5)
 
-        submit_button = st.form_submit_button('Submit')
+        #submit_button = st.form_submit_button('Submit')
+    
+    bank = st.sidebar.selectbox('Choose a Bank:', bank_names)
+
+    num_of_periods = st.sidebar.number_input('Number of Reporting Periods 1 - 30 (Default is 5)', value=5)
     
     cert = ms_banks[bank]
 
