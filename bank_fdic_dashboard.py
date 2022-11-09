@@ -162,7 +162,7 @@ def get_stock_history(symbol: str):
 
     
 def main():
-    st.title('FDIC Bank Call Report Dashboard ')
+    st.title('FDIC Bank Call Report Dashboard')
 
     #bank = st.text_input('Enter Bank FDIC Certificate Number:', value=None)
 
