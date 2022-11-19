@@ -165,7 +165,7 @@ def get_stock_history(symbol: str):
 
     
 def main():
-    st.title('FDIC Bank Call Report Dashboard')
+    st.title('FDIC Bank Call Report Dashboard - NEW')
 
     bank_names = [i for i in ms_banks]
     
