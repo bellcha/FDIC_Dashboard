@@ -113,7 +113,7 @@ def get_redis_data(bank:str) -> pd.DataFrame:
         print('Getting data from API to load into Redis')
         url = f'https://banks.data.fdic.gov/api/financials?filters=CERT%3A{bank}&fields=REPDTE%2CASSET%2CEEFFQR%2CDEP%2CNETINC%2CLNLSNET%2CROAQ%2CROEQ&sort_by=REPDTE&sort_order=DESC&limit=10000&offset=0&agg_limit=1&format=json&download=false&filename=data_file'
         raw_data = rq.get(url).text
-        client.set(bank, raw_data) 
+        client.set(bank, raw_data, px=86400) 
 
     bank_df = pd.DataFrame(columns=['repdte','asset','eeffqr', 'netinc', 'dep', 'lnlsnet', 'roaq', 'roeq', 'id'])
    
