@@ -1,21 +1,12 @@
 import requests as rq
 import json
 import pandas as pd
-from dataclasses import dataclass, asdict
+from fdic_data import BankData
 import streamlit as st
 import plotly.express as px
 import yfinance as yf
+import redis
 
-@dataclass
-class BankData:
-    REPDTE: str
-    ASSET: int
-    EEFFQR: float
-    NETINC: int
-    DEP: int
-    LOANS: int
-    ROA: float
-    ROE: float
 
 ms_banks = {'Amory Federal Savings and Loan Association': '28949', 
     'Bank of Anguilla': '8243', 
@@ -111,43 +102,55 @@ ms_banks = {'Amory Federal Savings and Loan Association': '28949',
     'Wells Fargo Bank, National Association': '3511', 
     'Woodforest National Bank': '23220'}
 
-def get_data(bank: str) -> pd.DataFrame:
 
-    url = f'https://banks.data.fdic.gov/api/financials?filters=CERT%3A{bank}&fields=REPDTE%2CASSET%2CEEFFQR%2CDEP%2CNETINC%2CLNLSNET%2CROAQ%2CROEQ&sort_by=REPDTE&sort_order=DESC&limit=10000&offset=0&agg_limit=1&format=json&download=false&filename=data_file'
-    data = json.loads(rq.get(url).text)
-    bank_df = pd.DataFrame(columns=['REPDTE','ASSET','EEFFQR', 'NETINC', 'DEP', 'LOANS', 'ROA', 'ROE'])
+client = redis.Redis(host='redis', port=6379, db=0)
 
-    for d in data['data']:
-        results = BankData(REPDTE=d['data']['REPDTE'], ASSET=d['data']['ASSET'], EEFFQR=d['data']['EEFFQR'], NETINC=d['data']['NETINC'], 
-                DEP=d['data']['DEP'], LOANS=d['data']['LNLSNET'], ROA=d['data']['ROAQ'], ROE=d['data']['ROEQ'])
-        row = pd.DataFrame(asdict(results), index=[0])
+def get_redis_data(bank:str) -> pd.DataFrame:
+    
+    raw_data = client.get(bank)
+    
+    if raw_data is None:
+        print('Getting data from API to load into Redis')
+        url = f'https://banks.data.fdic.gov/api/financials?filters=CERT%3A{bank}&fields=REPDTE%2CASSET%2CEEFFQR%2CDEP%2CNETINC%2CLNLSNET%2CROAQ%2CROEQ&sort_by=REPDTE&sort_order=DESC&limit=10000&offset=0&agg_limit=1&format=json&download=false&filename=data_file'
+        raw_data = rq.get(url).text
+        client.set(bank, raw_data) 
+
+    bank_df = pd.DataFrame(columns=['repdte','asset','eeffqr', 'netinc', 'dep', 'lnlsnet', 'roaq', 'roeq', 'id'])
+   
+    bank_data = BankData(**json.loads(raw_data))
+    
+    for d in bank_data.data:
+        row = pd.DataFrame(d.data.dict(), index=[0])
         bank_df = pd.concat([bank_df,row], axis=0 ,ignore_index=True)
 
     return bank_df
+
 
 def fdic_bar_chart(num_of_records: int, values: pd.DataFrame):
     
     values = values.head(num_of_records)
 
-    values = values.drop(['NETINC','EEFFQR', 'ROA', 'ROE'], axis=1)
+    values = values.drop(['netinc','eeffqr', 'roaq', 'roeq', 'id'], axis=1)
 
-    values = pd.melt(values,id_vars=['REPDTE'], var_name='Category', value_name='Total')
+    values = pd.melt(values,id_vars=['repdte'], var_name='Category', value_name='Total')
 
-    fig = px.bar(data_frame=values , x = 'REPDTE', color='Category', y='Total', barmode='group', title='Total Assets, Loans, and Deposits')
+    fig = px.bar(data_frame=values , x = 'repdte', color='Category', y='Total', barmode='group', title='Total Assets, Loans, and Deposits')
     
     return fig
+
 
 def get_return_ratios(num_of_records: int, values: pd.DataFrame):
 
     values = values.head(num_of_records)
 
-    values = values.drop(['ASSET', 'NETINC', 'EEFFQR', 'DEP', 'LOANS'],  axis=1)
+    values = values.drop(['asset', 'netinc', 'eeffqr', 'dep', 'lnlsnet', 'id'],  axis=1)
 
-    values = pd.melt(values, id_vars=['REPDTE'], var_name='Ratio', value_name = 'Number')
+    values = pd.melt(values, id_vars=['repdte'], var_name='Ratio', value_name = 'Number')
 
-    fig = px.bar(data_frame= values, x='REPDTE', color='Ratio', y='Number', barmode='group', title='ROA and ROE History')
+    fig = px.bar(data_frame= values, x='repdte', color='Ratio', y='Number', barmode='group', title='ROA and ROE History')
 
     return fig
+
 
 def get_stock_history(symbol: str):
     stock = yf.Ticker(symbol)
@@ -164,22 +167,7 @@ def get_stock_history(symbol: str):
 def main():
     st.title('FDIC Bank Call Report Dashboard')
 
-    #bank = st.text_input('Enter Bank FDIC Certificate Number:', value=None)
-
     bank_names = [i for i in ms_banks]
-
-    #with st.form(key = 'columns_in_form'):
-        #s1, s2 = st.columns(2)
-
-        #with s1:
-
-            #bank = st.selectbox('Choose a Bank:', bank_names)
-
-        #with s2:
-
-            #num_of_periods = st.number_input('Enter Number of Reporting Periods 1 - 30 (Default is 5)',1 , 30, value= 5)
-
-        #submit_button = st.form_submit_button('Submit')
     
     bank = st.sidebar.selectbox('Choose a Bank:', bank_names)
 
@@ -188,8 +176,8 @@ def main():
     cert = ms_banks[bank]
 
     st.subheader(f'{bank}')
-        
-    chart_data = get_data(cert)
+    
+    chart_data = get_redis_data(cert)
 
     fig = fdic_bar_chart(num_of_periods, chart_data)
 
@@ -202,11 +190,12 @@ def main():
     col1, col2 = st.columns(2)
     
     col1.write('Net Income')
-    col1.bar_chart(chart_data.head(num_of_periods), x='REPDTE', y='NETINC')
+    col1.bar_chart(chart_data.head(num_of_periods), x='repdte', y='netinc')
 
     col2.write('Effiency Ratio')
-    col2.bar_chart(chart_data.head(num_of_periods), x='REPDTE', y='EEFFQR')
-    
+    col2.bar_chart(chart_data.head(num_of_periods), x='repdte', y='eeffqr')
+
+    #Keeping here in case I want to get stock price data again. 
     #st.write(f'Stock Price History')
     #st.line_chart(stock_data, x = 'Date', y = 'Close')
 

@@ -1,0 +1,15 @@
+services:
+   redis: 
+     image: redislabs/redismod
+     container_name: redis
+     ports:
+       - '6379:6379' 
+   web:
+        build: .
+        container_name: fdicdashboard
+        ports:
+            - "8501:8501"
+        volumes:
+            - .:/code
+        depends_on:
+            - redis
