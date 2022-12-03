@@ -134,7 +134,7 @@ def fdic_bar_chart(num_of_records: int, values: pd.DataFrame):
 
     values = pd.melt(values,id_vars=['repdte'], var_name='Category', value_name='Total')
 
-    fig = px.bar(data_frame=values , x = 'repdte', color='Category', y='Total', barmode='group', title='Total Assets, Loans, and Deposits')
+    fig = px.bar(data_frame=values , x = 'repdte', color='Category', y='Total', barmode='group', title='Total Assets, Deposits, and Loans')
     
     return fig
 
