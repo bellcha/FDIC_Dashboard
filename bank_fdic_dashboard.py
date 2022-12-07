@@ -166,10 +166,8 @@ def get_stock_history(symbol: str):
     
 def main():
     st.title('FDIC Bank Call Report Dashboard')
-
-    bank_names = [i for i in ms_banks]
     
-    bank = st.sidebar.selectbox('Choose a Bank:', bank_names)
+    bank = st.sidebar.selectbox('Choose a Bank:', ms_banks.keys())
 
     num_of_periods = st.sidebar.number_input('Number of Reporting Periods 1 - 30 (Default is 5)', value=5)
     
@@ -178,7 +176,6 @@ def main():
     st.subheader(f'{bank}')
     
     chart_data = get_redis_data(cert)
-
 
     fig = fdic_bar_chart(num_of_periods, chart_data)
 
