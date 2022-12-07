@@ -103,7 +103,7 @@ ms_banks = {'Amory Federal Savings and Loan Association': '28949',
     'Woodforest National Bank': '23220'}
 
 
-client = redis.Redis(host='redis', port=6379, db=0)
+client = redis.Redis(host='10.69.69.107', port=6379, db=0)
 
 def get_redis_data(bank:str) -> pd.DataFrame:
     
@@ -198,11 +198,11 @@ def main():
 
     col3, col4 = st.columns(2)
 
-    col1.write('Total Equity Capital')
-    col1.bar_chart(chart_data.head(num_of_periods), x='repdte', y='eq')
+    col3.write('Total Equity Capital')
+    col3.bar_chart(chart_data.head(num_of_periods), x='repdte', y='eq')
 
-    col2.write('Other Comprehensive Income')
-    col2.bar_chart(chart_data.head(num_of_periods), x='repdte', y='eqccompi')
+    col4.write('Other Comprehensive Income')
+    col4.line_chart(chart_data.head(num_of_periods), x='repdte', y='eqccompi')
 
     #Keeping here in case I want to get stock price data again. 
     #st.write(f'Stock Price History')
