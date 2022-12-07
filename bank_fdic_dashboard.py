@@ -111,11 +111,11 @@ def get_redis_data(bank:str) -> pd.DataFrame:
     
     if raw_data is None:
         print('Getting data from API to load into Redis')
-        url = f'https://banks.data.fdic.gov/api/financials?filters=CERT%3A{bank}&fields=REPDTE%2CASSET%2CEEFFQR%2CDEP%2CNETINC%2CLNLSNET%2CROAQ%2CROEQ&sort_by=REPDTE&sort_order=DESC&limit=10000&offset=0&agg_limit=1&format=json&download=false&filename=data_file'
+        url = f'https://banks.data.fdic.gov/api/financials?filters=CERT%3A{bank}&fields=REPDTE%2CASSET%2CEEFFQR%2CDEP%2CNETINC%2CLNLSNET%2CROAQ%2CROEQ%2CEQ%2CEQCCOMPI&sort_by=REPDTE&sort_order=DESC&limit=10000&offset=0&agg_limit=1&format=json&download=false&filename=data_file'
         raw_data = rq.get(url).text
-        client.set(bank, raw_data, px=86400) 
+        client.set(bank, raw_data, px=86400)
 
-    bank_df = pd.DataFrame(columns=['repdte','asset','eeffqr', 'netinc', 'dep', 'lnlsnet', 'roaq', 'roeq', 'id'])
+    bank_df = pd.DataFrame(columns=['repdte','asset','eeffqr', 'netinc', 'dep', 'lnlsnet', 'roaq', 'roeq', 'eq', 'eqccompi', 'id'])
    
     bank_data = BankData(**json.loads(raw_data))
     
@@ -130,7 +130,7 @@ def fdic_bar_chart(num_of_records: int, values: pd.DataFrame):
     
     values = values.head(num_of_records)
 
-    values = values.drop(['netinc','eeffqr', 'roaq', 'roeq', 'id'], axis=1)
+    values = values.drop(['netinc','eeffqr', 'roaq', 'roeq', 'eq', 'eqccompi', 'id'], axis=1)
 
     values = pd.melt(values,id_vars=['repdte'], var_name='Category', value_name='Total')
 
@@ -143,7 +143,7 @@ def get_return_ratios(num_of_records: int, values: pd.DataFrame):
 
     values = values.head(num_of_records)
 
-    values = values.drop(['asset', 'netinc', 'eeffqr', 'dep', 'lnlsnet', 'id'],  axis=1)
+    values = values.drop(['asset', 'netinc', 'eeffqr', 'dep', 'lnlsnet', 'eq', 'eqccompi', 'id'],  axis=1)
 
     values = pd.melt(values, id_vars=['repdte'], var_name='Ratio', value_name = 'Number')
 
@@ -179,6 +179,7 @@ def main():
     
     chart_data = get_redis_data(cert)
 
+
     fig = fdic_bar_chart(num_of_periods, chart_data)
 
     st.plotly_chart(fig)
@@ -194,6 +195,14 @@ def main():
 
     col2.write('Effiency Ratio')
     col2.bar_chart(chart_data.head(num_of_periods), x='repdte', y='eeffqr')
+
+    col3, col4 = st.columns(2)
+
+    col1.write('Total Equity Capital')
+    col1.bar_chart(chart_data.head(num_of_periods), x='repdte', y='eq')
+
+    col2.write('Other Comprehensive Income')
+    col2.bar_chart(chart_data.head(num_of_periods), x='repdte', y='eqccompi')
 
     #Keeping here in case I want to get stock price data again. 
     #st.write(f'Stock Price History')

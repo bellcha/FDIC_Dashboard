@@ -22,11 +22,13 @@ class Meta(BaseModel):
 
 
 class Data(BaseModel):
-    repdte: str = Field(..., alias='REPDTE')
+    eqccompi: Optional[int] = Field(..., alias='EQCCOMPI')
+    repdte: Optional[str] = Field(..., alias='REPDTE')
     asset: int = Field(..., alias='ASSET')
     eeffqr: Optional[float] = Field(..., alias='EEFFQR')
     roaq: float = Field(..., alias='ROAQ')
     netinc: int = Field(..., alias='NETINC')
+    eq: Optional[int] = Field(..., alias='EQ')
     lnlsnet: int = Field(..., alias='LNLSNET')
     dep: int = Field(..., alias='DEP')
     roeq: float = Field(..., alias='ROEQ')
