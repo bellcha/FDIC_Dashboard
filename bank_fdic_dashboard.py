@@ -103,7 +103,7 @@ ms_banks = {'Amory Federal Savings and Loan Association': '28949',
     'Woodforest National Bank': '23220'}
 
 
-client = redis.Redis(host='10.69.69.107', port=6379, db=0)
+client = redis.Redis(host='redis', port=6379, db=0)
 
 def get_redis_data(bank:str) -> pd.DataFrame:
     
