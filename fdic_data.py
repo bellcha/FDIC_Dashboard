@@ -12,7 +12,7 @@ class Parameters(BaseModel):
 
 class Index(BaseModel):
     name: str
-    create_timestamp: str = Field(..., alias='createTimestamp')
+    create_timestamp: str = Field(..., alias="createTimestamp")
 
 
 class Meta(BaseModel):
@@ -22,17 +22,17 @@ class Meta(BaseModel):
 
 
 class Data(BaseModel):
-    eqccompi: Optional[int] = Field(..., alias='EQCCOMPI')
-    repdte: Optional[str] = Field(..., alias='REPDTE')
-    asset: int = Field(..., alias='ASSET')
-    eeffqr: Optional[float] = Field(..., alias='EEFFQR')
-    roaq: float = Field(..., alias='ROAQ')
-    netinc: int = Field(..., alias='NETINC')
-    eq: Optional[int] = Field(..., alias='EQ')
-    lnlsnet: int = Field(..., alias='LNLSNET')
-    dep: int = Field(..., alias='DEP')
-    roeq: float = Field(..., alias='ROEQ')
-    id: str = Field(..., alias='ID')
+    eqccompi: Optional[int] = Field(..., alias="EQCCOMPI")
+    repdte: Optional[str] = Field(..., alias="REPDTE")
+    asset: int = Field(..., alias="ASSET")
+    eeffqr: Optional[float] = Field(..., alias="EEFFQR")
+    roaq: float = Field(..., alias="ROAQ")
+    netinc: int = Field(..., alias="NETINC")
+    eq: Optional[int] = Field(..., alias="EQ")
+    lnlsnet: int = Field(..., alias="LNLSNET")
+    dep: int = Field(..., alias="DEP")
+    roeq: float = Field(..., alias="ROEQ")
+    id: str = Field(..., alias="ID")
 
 
 class Datum(BaseModel):

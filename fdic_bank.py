@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 import requests as rq
 import json
 
+
 class Parameters(BaseModel):
     filters: str
     fields: str
@@ -13,7 +14,7 @@ class Parameters(BaseModel):
 
 class Index(BaseModel):
     name: str
-    create_timestamp: str = Field(..., alias='createTimestamp')
+    create_timestamp: str = Field(..., alias="createTimestamp")
 
 
 class Meta(BaseModel):
@@ -23,9 +24,9 @@ class Meta(BaseModel):
 
 
 class Data(BaseModel):
-    cert: int = Field(..., alias='CERT')
-    name: str = Field(..., alias='NAME')
-    id: str = Field(..., alias='ID')
+    cert: int = Field(..., alias="CERT")
+    name: str = Field(..., alias="NAME")
+    id: str = Field(..., alias="ID")
 
 
 class BankData(BaseModel):
@@ -41,6 +42,3 @@ class BankInformation(BaseModel):
     meta: Optional[Meta] = None
     data: Optional[List[BankData]] = None
     totals: Optional[Totals] = None
-
-
-
