@@ -2,109 +2,84 @@ import requests as rq
 import json
 import pandas as pd
 from fdic_data import BankData
+from fdic_bank import BankInformation
 import streamlit as st
 import plotly.express as px
 import yfinance as yf
 import redis
 
 
-ms_banks = {'Amory Federal Savings and Loan Association': '28949', 
-    'Bank of Anguilla': '8243', 
-    'Bank of Brookhaven': '35439', 
-    'Bank of Commerce': '9359', 
-    'Bank of England': '13303', 
-    'Bank of Franklin': '10594', 
-    'Bank of Holly Springs': '8232', 
-    'Bank of Kilmichael': '9775', 
-    'Bank of Morton': '8556', 
-    'Bank of Wiggins': '8250', 
-    'Bank of Winona': '12207', 
-    'Bank of Yazoo City': '11431', 
-    'Bank OZK': '110', 
-    'Bank3': '15205', 
-    'BankFirst Financial Services': '8870', 
-    'BankOkolona': '5902', 
-    'BankPlus': '5903', 
-    'BNA Bank': '19448', 
-    'Cadence Bank': '11813', 
-    'CB&S Bank, Inc.': '15310', 
-    'Century Bank': '11448', 
-    'Citizens Bank': '324', 
-    'Citizens Bank & Trust Co.': '9777', 
-    'Commerce Bank': '34938', 
-    'Commercial Bank & Trust Co.': '8660', 
-    'Community Bank of Mississippi': '8879', 
-    'Community Spirit Bank': '50', 
-    'Concordia Bank & Trust Company': '8527', 
-    'Copiah Bank': '8231', 
-    'Covington County Bank': '21998', 
-    'Delta Bank': '26564', 
-    'Evolve Bank & Trust': '1299', 
-    'Farmers and Merchants Bank': '15801', 
-    'FIDELITY BANK': '28316', 
-    'First American National Bank': '19226',
-    'First Bank': '5907', 
-    'First Choice Bank': '5006', 
-    'FIRST COMMERCIAL BANK': '57069', 
-    'First Federal Savings and Loan Association': '30812', 
-    'First Financial Bank': '28905', 
-    'First Horizon Bank': '4977', 
-    'First National Bank of Clarksdale': '19070', 
-    "First National Banker's Bank": '25247', 
-    'First Security Bank': '17120', 
-    'First Southern Bank': '31158', 
-    'First State Bank': '15663', 
-    'FNB Oxford Bank': '5005', 
-    'FNB Picayune Bank': '16612', 
-    'FSNB, National Association': '16416', 
-    'Genesis Bank': '15817', 
-    'Grand Bank for Savings, FSB': '31864', 
-    'Great Southern Bank': '8552', 
-    'Guaranty Bank and Trust Company': '15953', 
-    'Hancock Whitney Bank': '12441', 
-    'Holmes County Bank': '321', 
-    'Home Bank, National Association': '28094', 
-    'Home Banking Company': '9196', 
-    'JPMorgan Chase Bank, National Association': '628', 
-    'Liberty Bank and Trust Company': '20856', 
-    'Magnolia State Bank': '22081', 
-    'Mechanics Bank': '12206', 
-    'Merchants & Marine Bank': '12203', 
-    'Merchants and Planters Bank': '327',
-    'Mississippi River Bank':'23222', 
-    'Origin Bank': '12614', 
-    'Oxford University Bank': '57034', 
-    'Paragon Bank': '57874', 
-    'Peoples Bank': '9366', 
-    'Pike National Bank': '26379', 
-    'Pinnacle Bank': '35583', 
-    'Planters Bank & Trust Company': '8235', 
-    'PriorityOne Bank': '21906', 
-    'Regions Bank': '12368', 
-    'Renasant Bank': '12437', 
-    'Richton Bank & Trust Company': '11817', 
-    'RiverHills Bank': '8234', 
-    'Southern Bancorp Bank': '1528', 
-    'Sycamore Bank': '11423', 
-    'The Bank of Forest': '898', 
-    'The Bank of Vernon': '51', 
-    'The Citizens Bank of Philadelphia, Mississippi': '12204', 
-    'The Citizens National Bank of Meridian': '4993', 
-    'The Cleveland State Bank': '12201', 
-    'The Commercial Bank': '9356', 
-    'The First Bank': '34217', 
-    'The Jefferson Bank': '11445', 
-    'The Peoples Bank': '15871', 
-    'The Peoples Bank, Biloxi, Mississippi': '340', 
-    'Truist Bank': '9846', 
-    'Trustmark National Bank': '4988', 
-    'United Mississippi Bank': '21083', 
-    'Unity Bank of Mississippi': '11446', 
-    'Wells Fargo Bank, National Association': '3511', 
-    'Woodforest National Bank': '23220'}
+states = [
+    "Alabama",
+    "Alaska",
+    "Arizona",
+    "Arkansas",
+    "California",
+    "Colorado",
+    "Connecticut",
+    "Delaware",
+    "Florida",
+    "Georgia",
+    "Hawaii",
+    "Idaho",
+    "Illinois",
+    "Indiana",
+    "Iowa",
+    "Kansas",
+    "Kentucky",
+    "Louisiana",
+    "Maine",
+    "Maryland",
+    "Massachusetts",
+    "Michigan",
+    "Minnesota",
+    "Mississippi",
+    "Missouri",
+    "Montana",
+    "Nebraska",
+    "Nevada",
+    "New Hampshire",
+    "New Jersey",
+    "New Mexico",
+    "New York",
+    "North Carolina",
+    "North Dakota",
+    "Ohio",
+    "Oklahoma",
+    "Oregon",
+    "Pennsylvania",
+    "Rhode Island",
+    "South Carolina",
+    "South Dakota",
+    "Tennessee",
+    "Texas",
+    "Utah",
+    "Vermont",
+    "Virginia",
+    "Washington",
+    "West Virginia",
+    "Wisconsin",
+    "Wyoming"
+]
+
 
 
 client = redis.Redis(host='redis', port=6379, db=0)
+
+def get_state_bank_info(state:str) -> dict:
+    url = f'https://banks.data.fdic.gov/api/institutions?filters=STNAME%3A%22{state}%22%20AND%20ACTIVE%3A1&fields=CERT%2CNAME&sort_by=OFFICES&sort_order=DESC&limit=10000&offset=0&format=json'
+
+    raw_data = rq.get(url).text
+
+    data = BankInformation(**json.loads(raw_data))
+
+    bank_dict = {}
+
+    for bank in data.data:
+        bank_dict[bank.data.name]=str(bank.data.cert)
+
+    return bank_dict
+
 
 def get_redis_data(bank:str) -> pd.DataFrame:
     
@@ -167,12 +142,16 @@ def get_stock_history(symbol: str):
     
 def main():
     st.title('FDIC Bank Call Report Dashboard')
+
+    state = st.sidebar.selectbox('Select a State: ', states)
+
+    bank_dict = get_state_bank_info(state)
     
-    bank = st.sidebar.selectbox('Choose a Bank:', ms_banks.keys())
+    bank = st.sidebar.selectbox('Choose a Bank:', bank_dict.keys())
 
     num_of_periods = st.sidebar.number_input('Number of Reporting Periods 1 - 30 (Default is 5)', value=5)
     
-    cert = ms_banks[bank]
+    cert = bank_dict[bank]
 
     st.subheader(f'{bank}')
     

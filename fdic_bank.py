@@ -1,6 +1,8 @@
 from __future__ import annotations
 from typing import List, Optional
 from pydantic import BaseModel, Field
+import requests as rq
+import json
 
 class Parameters(BaseModel):
     filters: str
@@ -26,7 +28,7 @@ class Data(BaseModel):
     id: str = Field(..., alias='ID')
 
 
-class Datum(BaseModel):
+class BankData(BaseModel):
     data: Data
     score: int
 
@@ -35,7 +37,10 @@ class Totals(BaseModel):
     count: int
 
 
-class Model(BaseModel):
+class BankInformation(BaseModel):
     meta: Optional[Meta] = None
-    data: Optional[List[Datum]] = None
+    data: Optional[List[BankData]] = None
     totals: Optional[Totals] = None
+
+
+
