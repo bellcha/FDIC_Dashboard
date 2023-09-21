@@ -67,9 +67,20 @@ client = redis.Redis(host="redis", port=6379, db=0)
 
 
 def get_state_bank_info(state: str) -> dict:
-    url = f"https://banks.data.fdic.gov/api/institutions?filters=STNAME%3A%22{state}%22%20AND%20ACTIVE%3A1&fields=CERT%2CNAME&sort_by=OFFICES&sort_order=DESC&limit=10000&offset=0&format=json"
 
-    raw_data = rq.get(url).text
+    url = "https://banks.data.fdic.gov/api/institutions"
+
+    params = {
+        "filters": f"STNAME:{state} AND ACTIVE:1",
+        "fields": "CERT,NAME",
+        "sort_by": "OFFICES",
+        "sort_order": "DESC",
+        "limit": "10000",
+        "offset": "0",
+        "format": "json",
+    }
+
+    raw_data = rq.get(url, params=params).text
 
     data = BankInformation(**json.loads(raw_data))
 
@@ -83,21 +94,33 @@ def get_state_bank_info(state: str) -> dict:
 
 def get_redis_data(bank: str) -> pd.DataFrame:
 
+    url = "https://banks.data.fdic.gov/api/financials"
+
+    params = {
+        "filters": f"CERT:{bank}",
+        "fields": "REPDTE,ASSET,EEFFQR,DEP,NETINC,LNLSNET,ROAQ,ROEQ,EQ,EQCCOMPI",
+        "sort_by": "REPDTE",
+        "sort_order": "DESC",
+        "limit": "10000",
+        "offset": "0",
+        "agg_limit": "1",
+        "format": "json",
+    }
+
     try:
 
         raw_data = client.get(bank)
 
         if raw_data is None:
             print("Getting data from API to load into Redis")
-            url = f"https://banks.data.fdic.gov/api/financials?filters=CERT%3A{bank}&fields=REPDTE%2CASSET%2CEEFFQR%2CDEP%2CNETINC%2CLNLSNET%2CROAQ%2CROEQ%2CEQ%2CEQCCOMPI&sort_by=REPDTE&sort_order=DESC&limit=10000&offset=0&agg_limit=1&format=json&download=false&filename=data_file"
-            raw_data = rq.get(url).text
+            raw_data = rq.get(url, params=params).text
             client.set(bank, raw_data, px=86400)
+
     except Exception as e:
 
         print(e)
 
-        url = f"https://banks.data.fdic.gov/api/financials?filters=CERT%3A{bank}&fields=REPDTE%2CASSET%2CEEFFQR%2CDEP%2CNETINC%2CLNLSNET%2CROAQ%2CROEQ%2CEQ%2CEQCCOMPI&sort_by=REPDTE&sort_order=DESC&limit=10000&offset=0&agg_limit=1&format=json&download=false&filename=data_file"
-        raw_data = rq.get(url).text
+        raw_data = rq.get(url, params=params).text
 
     bank_df = pd.DataFrame(
         columns=[
