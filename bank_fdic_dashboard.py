@@ -71,7 +71,7 @@ def get_state_bank_info(state: str) -> dict:
     url = "https://banks.data.fdic.gov/api/institutions"
 
     params = {
-        "filters": f"STNAME:{state} AND ACTIVE:1",
+        "filters": f'STNAME:"{state}" AND ACTIVE:1',
         "fields": "CERT,NAME",
         "sort_by": "OFFICES",
         "sort_order": "DESC",
