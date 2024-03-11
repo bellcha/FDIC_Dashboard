@@ -25,7 +25,7 @@ class Data(BaseModel):
     eqccompi: Optional[int] = Field(..., alias="EQCCOMPI")
     repdte: Optional[str] = Field(..., alias="REPDTE")
     asset: int = Field(..., alias="ASSET")
-    eeffqr: Optional[float] = Field(..., alias="EEFFQR")
+    eeffr: Optional[float] = Field(..., alias="EEFFR")
     roaq: float = Field(..., alias="ROAQ")
     netinc: int = Field(..., alias="NETINC")
     eq: Optional[int] = Field(..., alias="EQ")

@@ -98,7 +98,7 @@ def get_redis_data(bank: str) -> pd.DataFrame:
 
     params = {
         "filters": f"CERT:{bank}",
-        "fields": "REPDTE,ASSET,EEFFQR,DEP,NETINC,LNLSNET,ROAQ,ROEQ,EQ,EQCCOMPI",
+        "fields": "REPDTE,ASSET,EEFFR,DEP,NETINC,LNLSNET,ROAQ,ROEQ,EQ,EQCCOMPI",
         "sort_by": "REPDTE",
         "sort_order": "DESC",
         "limit": "10000",
@@ -126,7 +126,7 @@ def get_redis_data(bank: str) -> pd.DataFrame:
         columns=[
             "repdte",
             "asset",
-            "eeffqr",
+            "eeffr",
             "netinc",
             "dep",
             "lnlsnet",
@@ -152,7 +152,7 @@ def fdic_bar_chart(num_of_records: int, values: pd.DataFrame):
     values = values.head(num_of_records)
 
     values = values.drop(
-        ["netinc", "eeffqr", "roaq", "roeq", "eq", "eqccompi", "id"], axis=1
+        ["netinc", "eeffr", "roaq", "roeq", "eq", "eqccompi", "id"], axis=1
     )
 
     values = pd.melt(
@@ -176,7 +176,7 @@ def get_return_ratios(num_of_records: int, values: pd.DataFrame):
     values = values.head(num_of_records)
 
     values = values.drop(
-        ["asset", "netinc", "eeffqr", "dep", "lnlsnet", "eq", "eqccompi", "id"], axis=1
+        ["asset", "netinc", "eeffr", "dep", "lnlsnet", "eq", "eqccompi", "id"], axis=1
     )
 
     values = pd.melt(values, id_vars=["repdte"], var_name="Ratio", value_name="Number")
@@ -240,7 +240,7 @@ def main():
     col1.bar_chart(chart_data.head(num_of_periods), x="repdte", y="netinc")
 
     col2.write("Effiency Ratio")
-    col2.bar_chart(chart_data.head(num_of_periods), x="repdte", y="eeffqr")
+    col2.bar_chart(chart_data.head(num_of_periods), x="repdte", y="eeffr")
 
     col3, col4 = st.columns(2)
 
