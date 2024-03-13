@@ -7,6 +7,8 @@ import streamlit as st
 import plotly.express as px
 import yfinance as yf
 import redis
+from typing import List
+from functools import partial
 
 
 states = [
@@ -144,6 +146,10 @@ def get_redis_data(bank: str) -> pd.DataFrame:
         row = pd.DataFrame(d.data.dict(), index=[0])
         bank_df = pd.concat([bank_df, row], axis=0, ignore_index=True)
 
+    bank_df["repdte"] = pd.to_datetime(bank_df["repdte"], format="%Y%m%d")
+
+    bank_df = bank_df.sort_values(by="repdte", ascending=False)
+
     return bank_df
 
 
@@ -168,6 +174,8 @@ def fdic_bar_chart(num_of_records: int, values: pd.DataFrame):
         title="Total Assets, Deposits, and Loans",
     )
 
+    fig.update_layout(xaxis_title="Report Date")
+
     return fig
 
 
@@ -190,6 +198,32 @@ def get_return_ratios(num_of_records: int, values: pd.DataFrame):
         title="ROA and ROE History",
     )
 
+    fig.update_layout(xaxis_title="Report Date")
+    return fig
+
+
+def get_ratios_bar_chart(
+    num_of_records: int, values: pd.DataFrame, data_cols: List[str]
+):
+
+    values = values.head(num_of_records)
+
+    values_to_drop = [c for c in values.columns.values.tolist() if c not in data_cols]
+
+    values = values.drop(values_to_drop, axis=1)
+
+    values = pd.melt(values, id_vars=["repdte"], var_name="Ratio", value_name="Number")
+
+    fig = px.bar(
+        data_frame=values,
+        x="repdte",
+        # color="Ratio",
+        y="Number",
+        height=360,
+        width=360,
+    )
+
+    fig.update_layout(xaxis_title="Report Date")
     return fig
 
 
@@ -214,7 +248,7 @@ def main():
 
     bank_dict = get_state_bank_info(state)
 
-    bank = st.sidebar.selectbox("Choose a Bank:", bank_dict.keys())
+    bank = st.sidebar.selectbox("Choose a Bank:", sorted(bank_dict.keys()))
 
     num_of_periods = st.sidebar.number_input(
         "Number of Reporting Periods 1 - 30 (Default is 5)", value=5
@@ -236,19 +270,25 @@ def main():
 
     col1, col2 = st.columns(2)
 
+    bar_chart = partial(get_ratios_bar_chart, num_of_periods, chart_data)
+
     col1.write("Net Income")
-    col1.bar_chart(chart_data.head(num_of_periods), x="repdte", y="netinc")
+    ni_chart = bar_chart(["repdte", "netinc"])
+    col1.write(ni_chart)
 
     col2.write("Effiency Ratio")
-    col2.bar_chart(chart_data.head(num_of_periods), x="repdte", y="eeffr")
+    eff_ratio_chart = bar_chart(["repdte", "eeffr"])
+    col2.write(eff_ratio_chart)
 
     col3, col4 = st.columns(2)
 
     col3.write("Total Equity Capital")
-    col3.bar_chart(chart_data.head(num_of_periods), x="repdte", y="eq")
+    capital_chart = bar_chart(["repdte", "eq"])
+    col3.write(capital_chart)
 
     col4.write("Other Comprehensive Income")
-    col4.line_chart(chart_data.head(num_of_periods), x="repdte", y="eqccompi")
+    oci_chart = bar_chart(["repdte", "eqccompi"])
+    col4.write(oci_chart)
 
     # Keeping here in case I want to get stock price data again.
     # st.write(f'Stock Price History')
