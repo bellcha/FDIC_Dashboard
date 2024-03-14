@@ -176,6 +176,7 @@ def fdic_bar_chart(num_of_records: int, values: pd.DataFrame):
 
     fig.update_layout(xaxis_title="Report Date")
 
+    fig.update_xaxes(tickformat="%m/%d/%y", tickvals = values["repdte"])
     return fig
 
 
@@ -199,6 +200,8 @@ def get_return_ratios(num_of_records: int, values: pd.DataFrame):
     )
 
     fig.update_layout(xaxis_title="Report Date")
+
+    fig.update_xaxes(tickformat="%m/%d/%y", tickvals = values["repdte"])
     return fig
 
 
@@ -224,6 +227,7 @@ def get_ratios_bar_chart(
     )
 
     fig.update_layout(xaxis_title="Report Date")
+    fig.update_xaxes(tickformat="%m/%d/%y", tickvals = values["repdte"])
     return fig
 
 
